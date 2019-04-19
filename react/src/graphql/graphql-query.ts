@@ -32,7 +32,7 @@ export const subscribeTransactions = gql`
 `;
 
 const WS_URL = "wss://mainnet.eos.dfuse.io/graphql";
-const API_KEY = "web_6d99c117406c10f6fd9ee25c7d6f7323";
+const API_KEY = "";
 
 const wsLink = new WebSocketLink({
   uri: WS_URL,
