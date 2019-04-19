@@ -1,4 +1,4 @@
-package msig
+package main
 
 import (
 	"encoding/base64"

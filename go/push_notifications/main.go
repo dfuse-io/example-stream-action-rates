@@ -2,17 +2,16 @@ package main
 
 import (
 	"fmt"
-	"msig"
 
 	"github.com/anachronistic/apns"
 )
 
 func main() {
 
-	send := make(chan msig.Notification)
+	send := make(chan Notification)
 
 	go func() {
-		server := msig.NewServer("server_88bb56ce30a09e547450d9dc84e55716")
+		server := NewServer("server_88bb56ce30a09e547450d9dc84e55716")
 		if err := server.Run(send); err != nil {
 			panic(err)
 		}

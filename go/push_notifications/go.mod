@@ -1,4 +1,4 @@
-module msig
+module main
 
 go 1.12
 

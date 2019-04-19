@@ -1,4 +1,4 @@
-package msig
+package main
 
 import (
 	"bytes"
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"msig/bp"
-	"msig/insecure"
+	pbgraphql "main/bp"
+	"main/insecure"
 	"net/http"
 	"os"
 
