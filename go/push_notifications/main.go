@@ -1,13 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/anachronistic/apns"
 )
 
+var certPath = flag.String("cert", "", "TCP Listener addr for http")
+var keyPath = flag.String("key", "", "TCP Listener addr for gRPC")
+
 func main() {
 
+	flag.Parse()
+	if *certPath == "" || *keyPath == "" {
+		panic(fmt.Sprintf("Need both cert and key parameters, got: %s %s", *certPath, *keyPath))
+	}
 	send := make(chan Notification)
 
 	db := NewDatabase()
@@ -20,7 +28,7 @@ func main() {
 		}
 	}()
 
-	apnsClient := apns.NewClient("gateway.sandbox.push.apple.com:2195", "/Users/cbillett/Library/Mobile Documents/com~apple~CloudDocs/dfuse/eosqm/aps_development.pem", "/Users/cbillett/Library/Mobile Documents/com~apple~CloudDocs/dfuse/eosqm/aps_development-key.pem")
+	apnsClient := apns.NewClient("gateway.sandbox.push.apple.com:2195", *certPath, *keyPath)
 
 	for {
 		notification := <-send
