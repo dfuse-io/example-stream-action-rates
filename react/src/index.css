@@ -12,3 +12,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.App {
+  background-color: white;
+}
+
+.App .App-header {
+  background-color: white;
+
+}
