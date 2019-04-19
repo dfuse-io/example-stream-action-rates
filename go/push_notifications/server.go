@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"google.golang.org/grpc/credentials"
 	"io"
 	"io/ioutil"
 	pbgraphql "main/bp"
-	"main/insecure"
 	"net/http"
 	"os"
 
@@ -18,7 +18,6 @@ import (
 	"github.com/tidwall/gjson"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
 	"google.golang.org/grpc/grpclog"
 )
@@ -53,11 +52,13 @@ type Server struct {
 	jwt         *JWT
 	oauth2Token *oauth2.Token
 	wsConn      *websocket.Conn
+	db          *Database
 }
 
-func NewServer(apiKey string) *Server {
+func NewServer(apiKey string, db *Database) *Server {
 	return &Server{
 		apiKey: apiKey,
+		db:     db,
 	}
 }
 
@@ -71,7 +72,7 @@ func init() {
 func (s *Server) Run(send chan Notification) error {
 
 	//todo load previous cursor
-	cursor := ""
+	cursor := s.db.LoadCursor()
 
 	authToken, err := s.RefreshToken()
 	if err != nil {
@@ -79,13 +80,11 @@ func (s *Server) Run(send chan Notification) error {
 	}
 	perRPC := oauth.NewOauthAccess(authToken)
 	opts := []grpc.DialOption{
-		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(insecure.CertPool, "")),
-		//grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
 		grpc.WithPerRPCCredentials(perRPC),
 	}
 
-	server, err := grpc.Dial("localhost:9000", opts...)
-	//server, err := grpc.Dial("kylin.eos.dfuse.io:443", opts...)
+	server, err := grpc.Dial("kylin.eos.dfuse.io:443", opts...)
 	if err != nil {
 		return fmt.Errorf("run: grapheos server connection: %s", err)
 	}
@@ -109,10 +108,8 @@ func (s *Server) Run(send chan Notification) error {
 		  }
 		}
 `
-
-	//cur match query
-
-	vars := toVariable("data.requested.actor:lelapinnoir2", cursor, 0) //todo: change query to msig && executed
+	query := "account:eosio.msig action:propose"
+	vars := toVariable(query, cursor, 0)
 
 	exec, err := graphqlClient.Execute(ctx, &pbgraphql.Request{Query: q, Variables: vars})
 	if err != nil {
@@ -143,6 +140,7 @@ func (s *Server) Run(send chan Notification) error {
 		cursor := gjson.Get(response.Data, "data.searchTransactionsForward.cursor").Str
 		fmt.Println("Cursor:", cursor)
 
+		s.db.StoreCursor(cursor)
 		//todo: store cursor
 
 		undo := gjson.Get(response.Data, "data.searchTransactionsForward.undo").Bool()
@@ -161,15 +159,20 @@ func (s *Server) Run(send chan Notification) error {
 			message = fmt.Sprintf("Proposal '%s' proposed by %s has been cancel", proposal.Name, proposal.Proposer)
 		}
 
-		//todo: map eos account to deviceToken...
-
-		send <- Notification{
-			DeviceToken: "bbf082487c7236f65f4b17645596a31a3234a304cf5ac4db73a1b2c85a4d2445",
-			Message:     message,
+		for _, account := range proposal.Requested {
+			deviceToken := s.db.FindDeviceToken(account.Actor)
+			if deviceToken != nil {
+				fmt.Println("Sending notification to:", account.Actor)
+				send <- Notification{
+					DeviceToken: deviceToken.Token,
+					Message:     message,
+				}
+			} else {
+				fmt.Printf("Actor %s has not opt in for notification\n", account.Actor)
+			}
 		}
 	}
 
-	fmt.Println("Done!")
 	return nil
 }
 

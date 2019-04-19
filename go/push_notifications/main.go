@@ -10,8 +10,11 @@ func main() {
 
 	send := make(chan Notification)
 
+	db := NewDatabase()
+	db.OptInDeviceToken("lelapinnoir2", "bbf082487c7236f65f4b17645596a31a3234a304cf5ac4db73a1b2c85a4d2445", IOS)
+
 	go func() {
-		server := NewServer("server_88bb56ce30a09e547450d9dc84e55716")
+		server := NewServer("server_88bb56ce30a09e547450d9dc84e55716", db)
 		if err := server.Run(send); err != nil {
 			panic(err)
 		}
