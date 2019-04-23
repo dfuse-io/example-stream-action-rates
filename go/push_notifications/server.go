@@ -126,7 +126,7 @@ func (s *Server) Run(send chan Notification) error {
 		}
 		fmt.Println("Received response:", response.Data)
 
-		//Handling error from graphql subscription
+		//Handling error from lib subscription
 		errObjects := gjson.Get(response.Data, "errors").Array()
 		if len(errObjects) > 0 {
 
