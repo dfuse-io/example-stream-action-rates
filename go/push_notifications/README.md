@@ -1,10 +1,8 @@
-# dfuse.io Live Search
+# dfuse.io GraphQL API
 
-## Get started with `Push notification example`
-###Install and run
-todo ...
-###Token Management
+## Get started with a `Push notification example`
 
+### Token Management
 First, head on to our self-service API management portal (https://app.dfuse.io), after signing up you will be able to create long-term API keys.
 
 Once you have this API key, call the https://auth.dfuse.io/v1/auth/issue endpoint to get a fresh Authentication Token (JWT). 
@@ -34,7 +32,7 @@ Has documented [here](https://docs.dfuse.io/#rest-api-post-https-auth-dfuse-io-v
   "expires_at": 1550692172
 }
 ```
-###When to refresh your JWT token
+### When to refresh your JWT token
 Tokens have live span of 24h (that can vary) and need to be refresh before they expire. Please see [Lifecycle of short-lived JWTs](https://docs.dfuse.io/#authentication)
 
 https://auth.dfuse.io/v1/auth/issue endpoint is rate limited. Full documentation can be found here [API key types & Rate limiting](https://docs.dfuse.io/#authentication)
@@ -61,12 +59,12 @@ func (jwt JWT) NeedRefresh() bool {
 	return timeBeforeExpiration.Seconds() < threshold
 }
 ```
-###Getting the dfuse Graphql gRPC client
+### Getting the dfuse Graphql gRPC client
 - Take a look at gRPC [Go Quick Start](https://grpc.io/docs/quickstart/go.html)
 - You will need to retrive `graphql.proto` from [this location !!!MISSING!!!]()
 - execute `protoc -I bp/ bp/graphql.proto --go_out=plugins=grpc:graphql`
 
-###Initiating dfuse Graphql Server connection
+### Initiating dfuse Graphql Server connection
 Sever addresses can be found at [dfuse enpoints !!!need to add gRPC addresses!!!](https://docs.dfuse.io/#endpoints)   
 ```go
 ...
@@ -87,12 +85,12 @@ graphqlClient := pbgraphql.NewGraphQLClient(connection)
 
 ...
 ```
-###GraphQL query
+### GraphQL query
 - dfuse GraphQL documention can be found [here](!!!here is missing!!!)
 - If you are not familiar with GraphQL. Take a look at [Introduction to GraphQL](https://graphql.org/learn/) 
 - To help you construct your query and access our api documentation you can use [GraphiQL](https://mainnet.eos.dfuse.io/graphiql/) _"A graphical interactive in-browser GraphQL IDE."_ 
 https://mainnet.eos.dfuse.io/graphiql/
-###Executing a query 
+### Executing a query 
 ```go
 ...
 
@@ -125,7 +123,7 @@ This query `account:eosio.msig action:propose` will stream transactions containi
 
 Take a look at [Search query language specs](https://docs.dfuse.io/#search-query-language-specs) for complete documentation.   
  
-###Cursor and block numbers management
+### Cursor and block numbers management
 Complete api documentation is accessible through [GraphiQL](https://mainnet.eos.dfuse.io/graphiql/)
 - `lowBlockNum` parameter is the lower block num boundary, inclusively. A zero or negative value means a block relative to the head or last irreversible block (depending on irreversibleOnly).
 - `cursor` parameter is an opaque data piece that you can pass back to continue your search if it ever disconnected. Retrieve it from the cursor field in the responses of this call. It is safe to use the same cursor in BOTH directions (forward and backward).
@@ -149,7 +147,7 @@ s.db.StoreCursor(cursor)
 ...
 ```  
  
-###Reading server response
+### Reading server response
 ```go
 
 ...
@@ -191,9 +189,9 @@ for {
 
 ...
 ```    
-###Handling `undo` / fork
+### Handling fork
 
-see [handling]
+see [handling fork !!! Missing !!!!]()
 
 ```go
 ...
