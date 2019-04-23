@@ -1,5 +1,6 @@
-import {ApiTokenInfo} from "./token-refresher";
+import { ApiTokenInfo } from "./models";
 
+/** ApiTokenLocalStorage: basic local storage implementation for the api token **/
 export class ApiTokenLocalStorage {
   static get(): ApiTokenInfo | undefined {
     const expiresAt = localStorage.getItem("token_expires_at")
