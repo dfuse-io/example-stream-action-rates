@@ -78,62 +78,72 @@ class App extends Component<any, { topActions: string[] }> {
     );
   };
 
-  render() {
-    const cursor = "";
-    const lowBlockNum = -120;
+  renderLoading(){
+    return <p>Loading...</p>
+  }
+  
+  renderContent() {
+
     const data = this.state.topActions.slice(0, 10).map((topAction: string) => {
       return { name: topAction.split(":")[0], value: Math.floor(this.actionsMap[topAction] / this.timeRange) }
     })
 
+    return [<div key="1" style={{width: "100%", height: 300}}>
+            <ResponsiveContainer>
+                <BarChart
+                    width={500}
+                    height={300}
+                    data={data}
+                    margin={{
+                      top: 20, right: 30, left: 20, bottom: 5,
+                    }}
+                >
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="name"/>
+                    <YAxis scale="log" domain={['auto', 'auto']}/>
+                    <Bar dataKey="value" fill="#1c1e3e" label={{position: 'top'}}>
+                      {
+                        data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="#1c1e3e"/>
+                        ))
+                      }
+                    </Bar>
+                </BarChart>
+            </ResponsiveContainer>
+        </div>,
+      <Container key="2" height="700px">
+      <Grid xs={12}>
+      <Table>
+      <TableHead>
+      <TableRow>
+      <TableCell>Rank</TableCell>
+      <TableCell>Account</TableCell>
+      <TableCell>Action</TableCell>
+      <TableCell>Count per minute</TableCell>
+    </TableRow>
+    </TableHead>
+    <TableBody>{this.renderActions()}</TableBody>
+  </Table>
+    </Grid>
+    </Container>]
+  }
+
+  render() {
+    const cursor = "";
+    const lowBlockNum = -120;
+
     return (
       <div className="App">
         <ApolloProvider client={apolloClient}>
-            <Subscription
-              subscription={subscribeTransactions}
-              variables={{ cursor, lowBlockNum }}
-              onSubscriptionData={this.onSubscriptionData}
-            />
+          <Subscription
+            subscription={subscribeTransactions}
+            variables={{cursor, lowBlockNum}}
+            onSubscriptionData={this.onSubscriptionData}
+          />
           <div>
-            <h2>Average action rates since {this.startTimeString}</h2>
+            <h2 style={{color: "#1c1e3e"}}>Average action rates since {this.startTimeString}</h2>
           </div>
-            <div style={{ width: "100%", height: 300 }}>
-              <ResponsiveContainer>
-            <BarChart
-              width={500}
-              height={300}
-              data={data}
-              margin={{
-                top: 20, right: 30, left: 20, bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis scale="log" domain={['auto', 'auto']}  />
-              <Bar dataKey="value" fill="#8884d8"  label={{ position: 'top' }}>
-                {
-                  data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill="#555555" />
-                  ))
-                }
-              </Bar>
-            </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <Container height="700px">
-              <Grid xs={12}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Rank</TableCell>
-                      <TableCell>Account</TableCell>
-                      <TableCell>Action</TableCell>
-                      <TableCell>Count per minute</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>{this.renderActions()}</TableBody>
-                </Table>
-              </Grid>
-            </Container>
+          {this.state.topActions.length > 0 ? this.renderContent() : this.renderLoading()}
         </ApolloProvider>
       </div>
     );

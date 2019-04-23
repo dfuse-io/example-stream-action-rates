@@ -6,7 +6,6 @@ import { WebSocketLink } from "apollo-link-ws";
 import { getToken } from "./token-refresher";
 
 export const subscribeTransactions = gql`
-  
   fragment actionTracesFragment on ActionTrace {
     account
     receiver
