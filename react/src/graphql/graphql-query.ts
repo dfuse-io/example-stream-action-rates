@@ -4,13 +4,17 @@ import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { WebSocketLink } from "apollo-link-ws";
 import { getToken } from "./token-refresher";
-import { GQLTransactionFragments } from "./graphql-fragments";
 
 export const subscribeTransactions = gql`
-  ${GQLTransactionFragments.actionTrace}
+  
+  fragment actionTracesFragment on ActionTrace {
+    account
+    receiver
+    name
+  }
   subscription subscribeTransactions($cursor: String, $lowBlockNum: Int64) {
     searchTransactionsForward(
-      query: "status:executed"
+      query: "status:executed notif:false"
       lowBlockNum: $lowBlockNum
       cursor: $cursor
     ) {

@@ -1,9 +1,5 @@
 import React, { Component } from "react";
 import "./App.css";
-import MuiThemeProvider from "@material-ui/core/styles/MuiThemeProvider";
-import { red } from "@material-ui/core/colors";
-import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
-
 import styled from "@emotion/styled";
 import { display, height, space, width } from "styled-system";
 import Table from "@material-ui/core/Table/Table";
@@ -19,39 +15,40 @@ import {
   sortActions
 } from "./graphql/response-parser";
 import Grid from "@material-ui/core/Grid/Grid";
-import Card from "@material-ui/core/Card/Card";
-import Paper from "@material-ui/core/Paper/Paper";
+import {BarChart, CartesianGrid, XAxis, YAxis, Bar, Cell, ResponsiveContainer} from "recharts";
 
-const theme = createMuiTheme({
-  palette: {
-    primary: red
-  }
-});
-
-const Cell: React.ComponentType<any> = styled.div`
+const Container: React.ComponentType<any> = styled.div`
   ${space};
   ${width};
   ${height};
   ${display};
+  overflow-y: auto;
 `;
 
 class App extends Component<any, { topActions: string[] }> {
   actionsMap: { [key: string]: number } = {};
   interval: any = undefined;
   state = { topActions: [] };
-  startTime = Date.now();
+  startTime = 0;
+  startTimeString = "";
+  endTime = 0;
   componentDidMount(): void {
     this.interval = setInterval(() => {
       const topActions = sortActions(this.actionsMap);
       this.setState({ topActions: topActions.slice(0, 50) });
-    }, 1000);
+    }, 3500);
   }
 
-  renderActions(): JSX.Element[] {
-    let timeRange = (Date.now() - this.startTime) / (60 * 1000);
+  get timeRange() {
+    let timeRange = (this.endTime - this.startTime) / (60 * 1000);
     if (timeRange === 0) {
       timeRange = 1;
     }
+    return timeRange
+}
+
+  renderActions(): JSX.Element[] {
+
     return this.state.topActions.map((topAction: string, index: number) => {
       return (
         <TableRow key={index}>
@@ -59,7 +56,7 @@ class App extends Component<any, { topActions: string[] }> {
           <TableCell>{topAction.split(":")[0]}</TableCell>
           <TableCell>{topAction.split(":")[1]}</TableCell>
           <TableCell>
-            {Math.floor(this.actionsMap[topAction] / timeRange)}
+            {Math.floor(this.actionsMap[topAction] / this.timeRange)}
           </TableCell>
         </TableRow>
       );
@@ -68,6 +65,12 @@ class App extends Component<any, { topActions: string[] }> {
 
   onSubscriptionData = ({ client, subscriptionData }: any) => {
     const response = subscriptionData.data.searchTransactionsForward;
+    if(this.startTime === 0) {
+      this.startTime = new Date(response.trace.block.timestamp).getTime()
+      this.startTimeString = response.trace.block.timestamp
+    }
+    this.endTime = new Date(response.trace.block.timestamp).getTime()
+
     this.actionsMap = parseResponseFromGraphQL(
       this.actionsMap,
       response.trace,
@@ -77,18 +80,47 @@ class App extends Component<any, { topActions: string[] }> {
 
   render() {
     const cursor = "";
-    const lowBlockNum = -1;
+    const lowBlockNum = -120;
+    const data = this.state.topActions.slice(0, 10).map((topAction: string) => {
+      return { name: topAction.split(":")[0], value: Math.floor(this.actionsMap[topAction] / this.timeRange) }
+    })
+
     return (
       <div className="App">
         <ApolloProvider client={apolloClient}>
-          <MuiThemeProvider theme={theme}>
             <Subscription
               subscription={subscribeTransactions}
               variables={{ cursor, lowBlockNum }}
               onSubscriptionData={this.onSubscriptionData}
             />
-            <Card>
-              <Grid xs={10}>
+          <div>
+            <h2>Average action rates since {this.startTimeString}</h2>
+          </div>
+            <div style={{ width: "100%", height: 300 }}>
+              <ResponsiveContainer>
+            <BarChart
+              width={500}
+              height={300}
+              data={data}
+              margin={{
+                top: 20, right: 30, left: 20, bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis scale="log" domain={['auto', 'auto']}  />
+              <Bar dataKey="value" fill="#8884d8"  label={{ position: 'top' }}>
+                {
+                  data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill="#555555" />
+                  ))
+                }
+              </Bar>
+            </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <Container height="700px">
+              <Grid xs={12}>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -101,8 +133,7 @@ class App extends Component<any, { topActions: string[] }> {
                   <TableBody>{this.renderActions()}</TableBody>
                 </Table>
               </Grid>
-            </Card>
-          </MuiThemeProvider>
+            </Container>
         </ApolloProvider>
       </div>
     );

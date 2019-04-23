@@ -29,21 +29,20 @@ export async function getToken(apiKey: string): Promise<ApiTokenInfo> {
   return tokenInfo
 }
 
-
 export interface ApiTokenInfo {
   token: string
   expires_at: number
 }
 
 async function getTokenFromServer(apiKey: string): Promise<ApiTokenInfo> {
-  const url = "https://auth.dfuse.io/v1/auth/issue";
   const jsonBody = JSON.stringify({ api_key: apiKey })
 
-  return fetch(url, {  method: "POST", body: jsonBody }).then(async (response: Response) => {
-    const tokenInfo = await response.json()
-    ApiTokenLocalStorage.set(tokenInfo)
-    return Promise.resolve(tokenInfo)
-  })
+  return fetch("https://auth.dfuse.io/v1/auth/issue", {  method: "POST", body: jsonBody })
+    .then(async (response: Response) => {
+      const tokenInfo = await response.json()
+      ApiTokenLocalStorage.set(tokenInfo)
+      return Promise.resolve(tokenInfo)
+    })
 }
 
 

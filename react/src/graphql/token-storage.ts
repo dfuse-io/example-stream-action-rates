@@ -1,14 +1,9 @@
 import {ApiTokenInfo} from "./token-refresher";
 
-export enum TOKEN_LOCAL_STORAGE_NAMES {
-  EXPIRES_AT = "token_expires_at",
-  TOKEN = "token"
-}
-
 export class ApiTokenLocalStorage {
   static get(): ApiTokenInfo | undefined {
-    const expiresAt = localStorage.getItem(TOKEN_LOCAL_STORAGE_NAMES.EXPIRES_AT)
-    const token = localStorage.getItem(TOKEN_LOCAL_STORAGE_NAMES.TOKEN)
+    const expiresAt = localStorage.getItem("token_expires_at")
+    const token = localStorage.getItem("token")
 
     if (expiresAt === null || token === null) {
       return undefined
@@ -20,7 +15,7 @@ export class ApiTokenLocalStorage {
   }
 
   static set(apiTokenInfo: ApiTokenInfo) {
-    localStorage.setItem(TOKEN_LOCAL_STORAGE_NAMES.TOKEN, apiTokenInfo.token)
-    localStorage.setItem(TOKEN_LOCAL_STORAGE_NAMES.EXPIRES_AT, apiTokenInfo.expires_at.toString())
+    localStorage.setItem("token", apiTokenInfo.token)
+    localStorage.setItem("token_expires_at", apiTokenInfo.expires_at.toString())
   }
 }
