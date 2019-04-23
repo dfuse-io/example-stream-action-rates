@@ -4,13 +4,16 @@ import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { WebSocketLink } from "apollo-link-ws";
 import { getToken } from "./token-refresher";
-import { GQLTransactionFragments } from "./graphql-fragments";
 
 export const subscribeTransactions = gql`
-  ${GQLTransactionFragments.actionTrace}
+  fragment actionTracesFragment on ActionTrace {
+    account
+    receiver
+    name
+  }
   subscription subscribeTransactions($cursor: String, $lowBlockNum: Int64) {
     searchTransactionsForward(
-      query: "status:executed"
+      query: "status:executed notif:false"
       lowBlockNum: $lowBlockNum
       cursor: $cursor
     ) {
@@ -32,7 +35,7 @@ export const subscribeTransactions = gql`
 `;
 
 const WS_URL = "wss://mainnet.eos.dfuse.io/graphql";
-const API_KEY = "";
+const API_KEY = "web_24415c0a0b108b4096a8640234aa5303";
 
 const wsLink = new WebSocketLink({
   uri: WS_URL,
