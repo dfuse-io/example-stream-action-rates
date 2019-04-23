@@ -29,7 +29,6 @@ const Container: React.ComponentType<any> = styled.div`
   ${width};
   ${height};
   ${display};
-  overflow-y: auto;
 `;
 
 
@@ -82,6 +81,10 @@ class App extends Component<any, { topActions: string[] }> {
       response.trace,
       response.undo
     );
+
+
+      let height = document.getElementsByClassName("App")[0].clientHeight
+      window.parent.postMessage({"height": height}, "*")
   };
 
   /** RENDER Methods **/
@@ -121,7 +124,7 @@ class App extends Component<any, { topActions: string[] }> {
     });
 
     return [
-      <div key="1" style={{ width: "100%", height: 300 }}>
+      <div key="1" style={{ width: "100%", height: 300, paddingBottom: "50px" }}>
         <ResponsiveContainer>
           <BarChart
             width={500}
@@ -145,7 +148,7 @@ class App extends Component<any, { topActions: string[] }> {
           </BarChart>
         </ResponsiveContainer>
       </div>,
-      <Container key="2" height="700px">
+      <Container key="2">
         <Grid xs={12}>
           <Table>
             <TableHead>
@@ -169,7 +172,7 @@ class App extends Component<any, { topActions: string[] }> {
         <ApolloProvider client={apolloClient}>
           {this.renderSubscriber()}
           <div>
-            <h2 style={{ color: "#1c1e3e" }}>
+            <h2 style={{ color: "#1c1e3e", paddingTop: "40px" }}>
               Average action rates since {this.startTimeString}
             </h2>
           </div>
