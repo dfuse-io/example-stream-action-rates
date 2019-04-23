@@ -12,14 +12,11 @@ Once you have this API key, call the https://auth.dfuse.io/v1/auth/issue endpoin
 
 payload := `{"api_key":"YOUR_API_KEY_HERE"}`
 
-req, err := http.NewRequest("POST", "https://auth.dfuse.io/v1/auth/issue", bytes.NewBuffer([]byte(payload)))
+httpResp, err := http.Post("https://auth.dfuse.io/v1/auth/issue", "application/json", bytes.NewBuffer([]byte(payload)))
 if err != nil {
     return nil, fmt.Errorf("request creation: %s", err)
 }
-req.Header.Set("Content-Type", "application/json")
-
-client := &http.Client{}
-httpResp, err := client.Do(req)
+defer httpResp.Body.Close()
 
 ...
 
@@ -75,7 +72,7 @@ opts := []grpc.DialOption{
     grpc.WithPerRPCCredentials(credential),
 }
 
-connection, err := grpc.Dial("mainnet.eos.dfuse.io:443", opts...)
+connection, err := grpc.Dial("kylin.eos.dfuse.io:443", opts...)
 if err != nil {
     return fmt.Errorf("run: grapheos connection connection: %s", err)
 }

@@ -83,12 +83,15 @@ func (s *Server) Run(send chan Notification) error {
 		grpc.WithPerRPCCredentials(credential),
 	}
 
-	connection, err := grpc.Dial("mainnet.eos.dfuse.io:443", opts...)
+	fmt.Println("setting connecting to server")
+	connection, err := grpc.Dial("kylin.eos.dfuse.io:443", opts...)
+
 	if err != nil {
 		return fmt.Errorf("run: grapheos connection connection: %s", err)
 	}
 
 	ctx := context.Background()
+	fmt.Println("setting connection to client")
 	graphqlClient := pbgraphql.NewGraphQLClient(connection)
 
 	queryTemplate := `
@@ -110,12 +113,14 @@ func (s *Server) Run(send chan Notification) error {
 	search := "account:eosio.msig action:propose"
 	vars := toVariable(search, cursor, 0)
 
+	fmt.Sprintln("Sending graphql query to server")
 	executionClient, err := graphqlClient.Execute(ctx, &pbgraphql.Request{Query: queryTemplate, Variables: vars})
 	if err != nil {
 		return fmt.Errorf("run: grapheos executionClient: %s", err)
 	}
 
 	for {
+		fmt.Println("Waiting for response")
 		response, err := executionClient.Recv()
 		if err != nil {
 			if err != io.EOF {
@@ -223,16 +228,9 @@ func (s *Server) postFetchToken() (body []byte, err error) {
 
 	payload := fmt.Sprintf(`{"api_key":"%s"}`, s.apiKey)
 
-	req, err := http.NewRequest("POST", "https://auth.dfuse.io/v1/auth/issue", bytes.NewBuffer([]byte(payload)))
+	httpResp, err := http.Post("https://auth.dfuse.io/v1/auth/issue", "application/json", bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		return nil, fmt.Errorf("request creation: %s", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	httpResp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("http post: %s", err)
 	}
 	defer httpResp.Body.Close()
 
@@ -252,7 +250,7 @@ func (s *Server) postFetchToken() (body []byte, err error) {
 func toVariable(query string, cursor string, lowBlockNum int32) *structpb.Struct {
 	return &structpb.Struct{
 		Fields: map[string]*structpb.Value{
-			"query": {
+			"search": {
 				Kind: &structpb.Value_StringValue{
 					StringValue: query,
 				},
