@@ -160,7 +160,7 @@ for {
     }
     fmt.Println("Received response:", response.Data)
 
-    //Handling error from graphql subscription
+    lib
     errObjects := gjson.Get(response.Data, "errors").Array()
     if len(errObjects) > 0 {
 
