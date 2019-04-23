@@ -49,5 +49,4 @@ func main() {
 		fmt.Println("Success:", resp.Success)
 		fmt.Println("  Error:", resp.Error)
 	}
-
 }

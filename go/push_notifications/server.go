@@ -71,30 +71,29 @@ func init() {
 
 func (s *Server) Run(send chan Notification) error {
 
-	//todo load previous cursor
 	cursor := s.db.LoadCursor()
 
 	authToken, err := s.RefreshToken()
 	if err != nil {
 		return fmt.Errorf("run: %s", err)
 	}
-	perRPC := oauth.NewOauthAccess(authToken)
+	credential := oauth.NewOauthAccess(authToken)
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
-		grpc.WithPerRPCCredentials(perRPC),
+		grpc.WithPerRPCCredentials(credential),
 	}
 
-	server, err := grpc.Dial("kylin.eos.dfuse.io:443", opts...)
+	connection, err := grpc.Dial("mainnet.eos.dfuse.io:443", opts...)
 	if err != nil {
-		return fmt.Errorf("run: grapheos server connection: %s", err)
+		return fmt.Errorf("run: grapheos connection connection: %s", err)
 	}
 
 	ctx := context.Background()
-	graphqlClient := pbgraphql.NewGraphQLClient(server)
+	graphqlClient := pbgraphql.NewGraphQLClient(connection)
 
-	q := `
-		subscription ($query: String!, $cursor: String, $lowBlockNum: Int64) {
-		  searchTransactionsForward(query: $query, cursor: $cursor, lowBlockNum: $lowBlockNum) {
+	queryTemplate := `
+		subscription ($search: String!, $cursor: String, $lowBlockNum: Int64) {
+		  searchTransactionsForward(query: $search, cursor: $cursor, lowBlockNum: $lowBlockNum) {
 			cursor
 			undo
 			trace {
@@ -108,16 +107,16 @@ func (s *Server) Run(send chan Notification) error {
 		  }
 		}
 `
-	query := "account:eosio.msig action:propose"
-	vars := toVariable(query, cursor, 0)
+	search := "account:eosio.msig action:propose"
+	vars := toVariable(search, cursor, 0)
 
-	exec, err := graphqlClient.Execute(ctx, &pbgraphql.Request{Query: q, Variables: vars})
+	executionClient, err := graphqlClient.Execute(ctx, &pbgraphql.Request{Query: queryTemplate, Variables: vars})
 	if err != nil {
-		return fmt.Errorf("run: grapheos exec: %s", err)
+		return fmt.Errorf("run: grapheos executionClient: %s", err)
 	}
 
 	for {
-		response, err := exec.Recv()
+		response, err := executionClient.Recv()
 		if err != nil {
 			if err != io.EOF {
 				fmt.Println("error receiving message from search stream client:", err)
@@ -139,11 +138,7 @@ func (s *Server) Run(send chan Notification) error {
 
 		cursor := gjson.Get(response.Data, "data.searchTransactionsForward.cursor").Str
 		fmt.Println("Cursor:", cursor)
-
 		s.db.StoreCursor(cursor)
-		//todo: store cursor
-
-		undo := gjson.Get(response.Data, "data.searchTransactionsForward.undo").Bool()
 
 		rawProposal := gjson.Get(response.Data, "data.searchTransactionsForward.trace.matchingActions.0.json").Raw
 		proposal, err := NewProposal(rawProposal)
@@ -152,6 +147,7 @@ func (s *Server) Run(send chan Notification) error {
 		}
 		fmt.Println("Proposal name:", proposal.Name)
 
+		undo := gjson.Get(response.Data, "data.searchTransactionsForward.undo").Bool()
 		var message string
 		if !undo {
 			message = fmt.Sprintf("Please approve '%s' proposed by %s", proposal.Name, proposal.Proposer)
