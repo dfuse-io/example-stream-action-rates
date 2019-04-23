@@ -11,25 +11,24 @@ import (
 
 type JWT map[string]interface{}
 
-func (t JWT) NeedRefresh() bool {
-	exp := t["exp"].(float64)
-	iat := t["iat"].(float64)
+func (jwt JWT) NeedRefresh() bool {
+	exp := jwt["exp"].(float64)
+	iat := jwt["iat"].(float64)
 
 	lifespan := exp - iat
 	threshold := float64(lifespan) * 0.05
 	fmt.Println("lifespan:", lifespan)
 	fmt.Println("refresh threshold:", threshold)
 
-	expAt := time.Unix(int64(exp), 0)
+	expireAt := time.Unix(int64(exp), 0)
 	now := time.Now()
 
-	remaining := expAt.Sub(now)
-	fmt.Println("Second Remaining:", remaining.Seconds())
-	if remaining < 0 {
+	timeBeforeExpiration := expireAt.Sub(now)
+	if timeBeforeExpiration < 0 {
 		return true
 	}
 
-	return remaining.Seconds() < threshold
+	return timeBeforeExpiration.Seconds() < threshold
 }
 
 func ParseJwt(token string) (*JWT, error) {
