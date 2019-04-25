@@ -2,7 +2,7 @@
 
 # Stream action rates example
 
-This example demonstrates how to use the dfuse API in a React application to livestream the average rates from the top actions.   
+This example demonstrates how to use the dfuse GraphQL APIs in a React application to livestream the average rates from the top actions.   
 
 ### Token managment
 First, head on to our self-service API management portal (https://app.dfuse.io), after signing up you will be able to create long-term API keys.
