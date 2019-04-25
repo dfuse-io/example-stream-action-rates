@@ -254,10 +254,12 @@ export function parseResponseFromGraphQL(
 }
 ```
 
+The snippet above contains an `undo` parameter (returned inside the payload of the subscription response), that parameter handles `forks` inside the chain and the counter is decremented if it is set to `true`. Please refer to the full example to see how the output of `parseResponseFromGraphQL` is used inside the view.
+
 
 # Quick start to run the example
 
-The following you have yarn installed on your computer
+The following assumes you have yarn installed on your computer
 
 - Clone this repository
 - yarn install
