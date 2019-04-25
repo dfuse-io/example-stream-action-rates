@@ -32,7 +32,7 @@ Tokens have a life span of 24h (that can vary) and need to be refreshed before t
 
 https://auth.dfuse.io/v1/auth/issue endpoint is rated limited. Full documentation can be found here [API key types & Rate limiting](https://docs.dfuse.io/#authentication)
 
-```tyepscript
+```typescript
 
 /**
  * parseJwt: Extracts JSON data from the JWT token
@@ -127,7 +127,7 @@ https://mainnet.eos.dfuse.io/graphiql/
 
 We use the [gql](https://www.apollographql.com/docs/react/essentials/queries) function to build our subscription query:
 
-```
+```typescript
 import { gql } from "apollo-boost";
 
 /**
