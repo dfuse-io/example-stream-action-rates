@@ -166,6 +166,34 @@ export const subscribeTransactions = gql`
 `;
 ```
 
+### Use in react application
+
+Apollo provides an `ApolloProvider` component to link the apollo client to the React application. Using the subscription query is as simple as passing it to the `Subscription` component (read [apollo doc[(https://www.apollographql.com/docs/react/advanced/subscriptions) for more details)
+
+
+```typescript
+class App extends Component {
+  
+  ...
+ 
+  onSubscriptionData = ({ client, subscriptionData }: any) => {
+    const response = subscriptionData.data.searchTransactionsForward;
+    console.log(response)
+  };
+  
+  render() {
+    return <ApolloProvider client={apolloClient}>
+      <Subscription
+        subscription={subscribeTransactions}
+        variables={{ cursor: "", lowBlockNum: -100 }}
+        onSubscriptionData={this.onSubscriptionData}
+      />
+    </ApolloProvider>
+    
+  }
+}
+
+```
 
 
 
