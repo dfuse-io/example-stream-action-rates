@@ -195,7 +195,64 @@ class App extends Component {
 
 ```
 
+### Parsing server response
 
+The response from the server is parsed and fed into an `actionsMap` hash to hold the rates for each action contract/name pair
+
+```typescript
+/**
+** interfaces representing the output from graphql
+**/
+export interface GraphQLTransactionTrace {
+  block: {
+    id: string;
+    num: number;
+    timestamp: string;
+  };
+  executedActions: GraphQLActionTrace[];
+  id: string;
+  status: string;
+}
+
+export interface GraphQLActionTrace {
+  account: string;
+  data: any;
+  name: string;
+  receiver: string;
+}
+
+/**
+* ActionMap:
+* format "<action-acccount>:<action-name>": count
+* used to render stats in the react application
+**/
+export interface ActionMap {
+ [key:string]: number
+}
+
+/**
+ * parseResponseFromGraphQL:
+ * parses the transaction trace from the backend and fills an actionsMap bucket with it
+ * returns the actionsMap
+ * the 'undo' property relates to the block irreversibility and controls the incrementation
+ **/
+export function parseResponseFromGraphQL(
+  actionsMap: ActionMap,
+  data: GraphQLTransactionTrace,
+  undo: boolean
+) {
+  data.executedActions.map((action: GraphQLActionTrace) => {
+    const key = `${action.account}:${action.name}`;
+    const increment = undo ? -1 : 1;
+    if (!actionsMap[key]) {
+      actionsMap[key] = increment;
+    } else {
+      actionsMap[key] += increment;
+    }
+  });
+  return actionsMap;
+}
+```
 
 
 # Quick start to run the example
