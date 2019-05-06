@@ -7,6 +7,8 @@ import TableHead from "@material-ui/core/TableHead/TableHead";
 import TableRow from "@material-ui/core/TableRow/TableRow";
 import TableCell from "@material-ui/core/TableCell/TableCell";
 import TableBody from "@material-ui/core/TableBody/TableBody";
+import { faGithub } from "@fortawesome/free-brands-svg-icons/faGithub";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Subscription from "react-apollo/Subscriptions";
 import { subscribeTransactions } from "./lib/graphql-subscription";
 import ApolloProvider from "react-apollo/ApolloProvider";
@@ -31,6 +33,15 @@ const Container: React.ComponentType<any> = styled.div`
   ${display};
 `;
 
+const GithubContainer: React.ComponentType<any> = styled.div`
+  padding-left: 10px;
+  &:hover{
+    cursor: pointer;
+  };
+  &:hover path {
+    color: #ff4660;
+  };
+`;
 
 /**
  * React application implementing the average action rates widget using
@@ -165,7 +176,9 @@ class App extends Component<any, { topActions: string[] }> {
       </Container>
     ];
   }
-
+  goToGithub() {
+          window.location.href="https://github.com/dfuse-io/example-stream-action-rates"
+  }
   render() {
     return (
       <div className="App">
@@ -175,6 +188,12 @@ class App extends Component<any, { topActions: string[] }> {
             <h2 style={{ color: "#1c1e3e", paddingTop: "40px" }}>
               Average action rates since {this.startTimeString}
             </h2>
+            <h3 style={{ color: "#777", paddingTop: "20px" }}>
+              Example React application using dfuse GraphQL API
+              <GithubContainer style={{ display: "inline-block" }} onClick={this.goToGithub} >
+                <FontAwesomeIcon icon={faGithub} color="#777"/>
+              </GithubContainer>
+            </h3>
           </div>
           {this.state.topActions.length > 0
             ? this.renderWidgets()
