@@ -4,6 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@dfuse/client": "^0.2.6",
     "@emotion/core": "^10.0.10",
     "@emotion/styled": "^10.0.10",
     "@fortawesome/fontawesome-svg-core": "^1.2.0-14",

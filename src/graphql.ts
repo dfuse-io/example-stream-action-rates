@@ -1,7 +1,7 @@
 import { gql } from "apollo-boost";
 
 /**
-* subscribeTransactions:
+* SubscribeTransactions:
 * Subscription query to connect to the transaction stream
 * $cursor: pagination cursor, can be saved to be reused in case of disconnection
 * $lowBlockNum: starting block num, a negative number means fetching the past N blocks
@@ -12,6 +12,7 @@ export const subscribeTransactions = gql`
     receiver
     name
   }
+
   subscription subscribeTransactions($cursor: String, $lowBlockNum: Int64) {
     searchTransactionsForward(
       query: "status:executed notif:false"
@@ -19,14 +20,15 @@ export const subscribeTransactions = gql`
       cursor: $cursor
     ) {
       cursor
+      undo
       trace {
+        id
         status
         block {
           id
           num
           timestamp
         }
-        id
         executedActions {
           ...actionTracesFragment
         }

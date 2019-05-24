@@ -892,6 +892,13 @@
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
   integrity sha512-5a6wqoJV/xEdbRNKVo6I4hO3VjyDq//8q2f9I6PBAvMesJHFauXDorcNCsr9RzvsZnaWi5NYCcfyqP1QeFHFbw==
 
+"@dfuse/client@^0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@dfuse/client/-/client-0.2.6.tgz#c47e6cc2ccf0d54215db7bbbe10391b7a06be696"
+  integrity sha512-392uotGxKrA3SISCmYwLiBsRjkwpvyaqDXDrOowC8WGypqehVjcGF789e94nNCQNWL+6i13OtDkNj3mImERjcg==
+  dependencies:
+    debug "^4.1.0"
+
 "@emotion/cache@^10.0.9":
   version "10.0.9"
   resolved "https://registry.yarnpkg.com/@emotion/cache/-/cache-10.0.9.tgz#e0c7b7a289f7530edcfad4dcf3858bd2e5700a6f"

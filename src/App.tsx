@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "./App.css";
 import styled from "@emotion/styled";
 import { display, height, space, width } from "styled-system";
 import Table from "@material-ui/core/Table/Table";
@@ -10,9 +9,7 @@ import TableBody from "@material-ui/core/TableBody/TableBody";
 import { faGithub } from "@fortawesome/free-brands-svg-icons/faGithub";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Subscription from "react-apollo/Subscriptions";
-import { subscribeTransactions } from "./lib/graphql-subscription";
 import ApolloProvider from "react-apollo/ApolloProvider";
-import { parseResponseFromGraphQL, sortActions } from "./lib/response-parser";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
   BarChart,
@@ -23,8 +20,12 @@ import {
   Cell,
   ResponsiveContainer
 } from "recharts";
-import { apolloClient } from "./lib/apollo-client";
-import { ActionMap } from "./lib/models";
+
+import "./App.css";
+
+import { apolloClient } from "./client";
+import { ActionMap, SearchResult } from "./models";
+import { subscribeTransactions } from "./graphql";
 
 const Container: React.ComponentType<any> = styled.div`
   ${space};
@@ -50,55 +51,68 @@ const GithubContainer: React.ComponentType<any> = styled.div`
  * coupled with the ApolloProvider (see main 'render()' method)
  * the packages material-ui and recharts are used for the table render and charts respectively
 **/
-class App extends Component<any, { topActions: string[] }> {
+export class App extends Component<any, { topActions: string[] }> {
   actionsMap: ActionMap = {};
   interval: any = undefined;
-  state = { topActions: [] };
   startTime = 0;
   startTimeString = "";
   endTime = 0;
 
-  /**
-  * setInterval throttles the render refresh
-  * to increase both performance and user experience
-  **/
-  componentDidMount(): void {
-    this.interval = setInterval(() => {
-      const topActions = sortActions(this.actionsMap);
-      this.setState({ topActions: topActions.slice(0, 50) });
-    }, 3500);
-  }
+  state = { topActions: [] };
 
+  get sortedActionKeys() {
+    return Object.keys(this.actionsMap).sort((a, b) => {
+      return this.actionsMap[b] - this.actionsMap[a];
+    });
+  }
 
   get timeRange() {
     let timeRange = (this.endTime - this.startTime) / (60 * 1000);
     if (timeRange === 0) {
       timeRange = 1;
     }
+
     return timeRange;
   }
 
-  /** Parses the data from payload and updates the timerange **/
-  onSubscriptionData = ({ client, subscriptionData }: any) => {
-    const response = subscriptionData.data.searchTransactionsForward;
-    if (this.startTime === 0) {
-      this.startTime = new Date(response.trace.block.timestamp).getTime();
-      this.startTimeString = response.trace.block.timestamp;
+  /**
+   * Using a setInterval throttles the render refresh to increase both
+   * performance and user experience.
+   **/
+  componentDidMount(): void {
+    this.interval = setInterval(() => {
+      this.setState({ topActions: this.sortedActionKeys.slice(0, 50) });
+    }, 3500);
+  }
+
+  componentWillUnmount(): void {
+    if (this.interval) {
+      clearInterval(this.interval)
+      this.interval = undefined
     }
-    this.endTime = new Date(response.trace.block.timestamp).getTime();
+  }
 
-    this.actionsMap = parseResponseFromGraphQL(
-      this.actionsMap,
-      response.trace,
-      response.undo
-    );
+  onSubscriptionData = ({ client, subscriptionData }: any) => {
+    const { undo, trace } = (subscriptionData.data.searchTransactionsForward) as SearchResult;
 
+    if (this.startTime === 0) {
+      this.startTimeString = trace.block.timestamp;
+      this.startTime = new Date(this.startTimeString).getTime();
+    }
 
-      let height = document.getElementsByClassName("App")[0].clientHeight
-      window.parent.postMessage({"height": height}, "*")
+    this.endTime = new Date(trace.block.timestamp).getTime();
+
+    trace.executedActions.forEach((action) => {
+      const key = `${action.account}:${action.name}`;
+      const increment = undo ? -1 : 1;
+
+      this.actionsMap[key] = (this.actionsMap[key] || 0) + increment;
+    });
+
+    const height = document.getElementsByClassName("App")[0].clientHeight
+    window.parent.postMessage({"height": height}, "*")
   };
 
-  /** RENDER Methods **/
   renderActions(): JSX.Element[] {
     return this.state.topActions.map((topAction: string, index: number) => {
       return (
@@ -203,5 +217,3 @@ class App extends Component<any, { topActions: string[] }> {
     );
   }
 }
-
-export default App;
