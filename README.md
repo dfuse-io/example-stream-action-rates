@@ -95,7 +95,7 @@ export const subscribeTransactions = gql`
 
   subscription subscribeTransactions($cursor: String, $lowBlockNum: Int64) {
     searchTransactionsForward(
-      query: "status:executed notif:false"
+      query: "action:transfer"
       lowBlockNum: $lowBlockNum
       cursor: $cursor
     ) {
