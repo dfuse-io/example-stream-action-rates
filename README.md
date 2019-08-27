@@ -3,7 +3,7 @@
 ## Stream action rates example
 
 This example demonstrates how to use the dfuse GraphQL APIs in a React application to livestream the
-average rates from the top actions. A live demo is available [here](http://labs.dfuse.io/livesearch/)
+average rates from the top actions. A live demo is available [here](http://labs.dfuse.io/actionrates/)
 
 ### Quick Start
 
