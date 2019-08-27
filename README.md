@@ -3,7 +3,7 @@
 ## Stream action rates example
 
 This example demonstrates how to use the dfuse GraphQL APIs in a React application to livestream the
-average rates from the top actions. A live demo is available [here](http://labs.dfuse.io/actionrates/)
+average execution rates for the top actions. A live demo is available [here](http://labs.dfuse.io/livesearch/).
 
 ### Quick Start
 
@@ -17,12 +17,12 @@ The following assumes you have yarn installed on your computer.
 
 ### Walkthrough
 
-First, head on to our self-service API management portal (https://app.dfuse.io), after signing up you
+First, head to the dfuse self-service API management portal (https://app.dfuse.io). After signing up, you
 will be able to create long-term API keys.
 
 We use the [Apollo Client](https://www.apollographql.com/docs/react/) as well as the
 [@dfuse/client](https://github.com/dfuse-io/client-js)
-library to connect to the graphQL server. You can install the Apollo Client and other
+library to connect to the GraphQL server. You can install the Apollo Client and other
 required packages via:
 
 ```
@@ -30,10 +30,10 @@ yarn add @dfuse/client apollo-boost apollo-client apollo-link-ws graphql react-a
 ```
 
 The easiest way to talk to the dfuse API is to use the [@dfuse/client](https://github.com/dfuse-io/client-js)
-library which does all the heavy work of retrieving an API token, persist it to disk to avoid hit rate limits on
-API token issuance and ensures the token is always fresh.
+library which handles all of the heavy work of retrieving an API token, persist it to disk to avoid hitting rate limits on
+API token issuance, and ensures the token is always fresh.
 
-In our example, we instantiate the Apollo Client like follows to leverage the power of
+In our example, we instantiate the Apollo Client to leverage the power of
 [@dfuse/client](https://github.com/dfuse-io/client-js) library and let it handle API token management:
 
 <small>See [src/client.ts](https://github.com/dfuse-io/example-stream-action-rates/tree/master/src/client.ts)</small>
@@ -46,7 +46,7 @@ import { createDfuseClient } from "@dfuse/client";
 
 const dfuseClient = createDfuseClient({
   network: "mainnet",
-  apiKey: "web_24415c0a0b108b4096a8640234aa5303" // <--- Change this value for your own API Key!
+  apiKey: "web_24415c0a0....." // <--- Change this value for your own API Key!
 })
 
 const wsLink = new WebSocketLink({
@@ -74,10 +74,10 @@ export const apolloClient = new ApolloClient({
 
 - The dfuse GraphQL documentation can be found [here](https://docs.dfuse.io/#graphql)
 - If you are not familiar with GraphQL already, take a look at [Introduction to GraphQL](https://graphql.org/learn/)
-- To help you construct your query and access our api documentation you can use [GraphiQL](https://mainnet.eos.dfuse.io/graphiql/) _"A graphical interactive in-browser GraphQL IDE."_
+- To help you construct your query and access our API documentation you can use [GraphiQL](https://mainnet.eos.dfuse.io/graphiql/) _"A graphical interactive in-browser GraphQL IDE."_
 https://mainnet.eos.dfuse.io/graphiql/
 
-### Build the graphQL subscription
+### Build the GraphQL subscription
 
 We use the [gql](https://www.apollographql.com/docs/react/essentials/queries) function to build our subscription query:
 
