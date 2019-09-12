@@ -46,7 +46,7 @@ import { createDfuseClient } from "@dfuse/client";
 
 const dfuseClient = createDfuseClient({
   network: "mainnet",
-  apiKey: "web_24415c0a0....." // <--- Change this value for your own API Key!
+  apiKey: "YOUR_API_KEY_HERE" // <--- Change this value for your own API Key!
 })
 
 const wsLink = new WebSocketLink({

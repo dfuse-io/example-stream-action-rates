@@ -5,7 +5,7 @@ import { createDfuseClient } from "@dfuse/client";
 
 const dfuseClient = createDfuseClient({
   network: "mainnet",
-  apiKey: "web_24415c0a0b108b4096a8640234aa5303"
+  apiKey: "web_ddaf4dcba8fd11d0f52566a27b4ffc1e"
 })
 
 const wsLink = new WebSocketLink({
